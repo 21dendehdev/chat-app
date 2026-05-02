@@ -16,6 +16,20 @@ const adminRoutes   = require("./routes/adminRoutes");
 const socketHandler = require("./sockets/socket");
 
 const app  = express();
+
+// CORS middleware (must be early)
+app.use(cors({
+  origin: "*",
+  credentials: true
+}));
+
+// Core middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+const PORT = process.env.PORT || 5000;
+
+console.log("Server initializing...");
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
@@ -44,22 +58,8 @@ app.get(/.*/, (req, res) => {
   res.sendFile(path.join(clientBuildPath, "index.html"));
 });
 
-/* Connect DB and start
-const mongoose = require("mongoose");
-console.log("MONGO_URI:", process.env.MONGO_URI);
-mongoose.connect(process.env.MONGO_URI)
-
-. then(() => {
-    console.log("MongoDB connected");
-    const server = http.createServer(app);
-    const io = new Server(server, { cors: { origin: "*", methods: ["GET", "POST"] } });
-    socketHandler(io);
-    server.listen(PORT, () => console.log(`Server on port ${PORT}`));
-  })
-  .catch(err => console.error("DB Error:", err));*/
 
 
-console.log("MONGO_URI:", process.env.MONGO_URI);
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
