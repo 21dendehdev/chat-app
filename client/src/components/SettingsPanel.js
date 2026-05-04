@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import axios from "axios";
+import BASE_URL from '../config';
 
 function SettingsPanel({ user, onClose, onUserUpdate, onLogout }) {
   const [activeTab, setActiveTab] = useState('profile');

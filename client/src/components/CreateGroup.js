@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import BASE_URL from '../config';
 
 function getInitials(name = '') { return name.slice(0, 2).toUpperCase(); }
 

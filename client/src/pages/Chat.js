@@ -4,6 +4,7 @@ import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import ChatWindow from '../components/ChatWindow';
 import CreateGroup from '../components/CreateGroup';
+import BASE_URL from '../config';
 
 function Chat({ user, onLogout, onUserUpdate }) {
   const [contacts, setContacts] = useState([]);
@@ -91,7 +92,7 @@ function Chat({ user, onLogout, onUserUpdate }) {
 
   // Load contacts
 useEffect(() => {
-  const API = process.env.REACT_APP_API_URL;
+ 
 
   axios.get(`${API}/api/users`), {
     headers: { Authorization: `Bearer ${user.token}` }
