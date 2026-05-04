@@ -41,8 +41,8 @@ function SettingsPanel({ user, onClose, onUserUpdate, onLogout }) {
 
     try {
       const response = await axios.post(
-        `${API}//api/users/upload-avatar/${user.id}`,
-        data,
+        `${BASE_URL}/api/users/upload-avatar/${user.id}`,
+        formdata,
         {
           headers: {
             Authorization: `Bearer ${user.token}`,
@@ -90,7 +90,7 @@ function SettingsPanel({ user, onClose, onUserUpdate, onLogout }) {
 
     setLoading(true);
     try {
-      await axios.put(`${API}/api/users/password", {
+     await axios.put(`${BASE_URL}/api/users/password`,  {
         userId: user.id,
         oldPassword: formData.oldPassword,
         newPassword: formData.newPassword

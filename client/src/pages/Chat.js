@@ -94,7 +94,7 @@ function Chat({ user, onLogout, onUserUpdate }) {
 useEffect(() => {
  
 
-  axios.get(`${API}/api/users`), {
+ axios.get(`${BASE_URL}/api/groups/user/${user.id}`, {
     headers: { Authorization: `Bearer ${user.token}` }
   })
     .then(r => setContacts(r.data.filter(u => u._id !== user.id)))
@@ -103,7 +103,7 @@ useEffect(() => {
 
   // Load groups
   useEffect(() => {
-    axios.get((`${API}/api/groups/user/${user.id}`, {
+   axios.get(`${BASE_URL}/api/groups/user/${user.id}`, {
       headers: { Authorization: `Bearer ${user.token}` }
     })
       .then(r => {
@@ -126,10 +126,13 @@ useEffect(() => {
     handleSelectChat({ type: 'group', id: group._id, name: group.name, members: group.members });
   };
 
-  const handleRefreshUsers = () => {
-    axios.get((`${API}/api/users', {
-      headers: { Authorization: `Bearer ${user.token}` }
-    })
+
+
+  const handleRefreshUsers = () =>
+   { 
+    axios.get(`${BASE_URL}/api/groups/user/${user.id}`, {
+  headers: { Authorization: `Bearer ${user.token}`, }
+})
       .then(r => setContacts(r.data.filter(u => u._id !== user.id)))
       .catch(() => {});
   };

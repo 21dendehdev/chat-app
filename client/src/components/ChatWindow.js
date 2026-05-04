@@ -2,8 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import BASE_URL from '../config';
 
-function getInitials(name = '') { return name.slice(0, 2).toUpperCase(); }
-
 function ChatWindow({ user, selectedChat, socket, onlineUsers, messages, setMessages }) {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -13,25 +11,36 @@ function ChatWindow({ user, selectedChat, socket, onlineUsers, messages, setMess
   const bottomRef = useRef(null);
   const typingTimeout = useRef(null);
   const textareaRef = useRef(null);
-const API = process.env.REACT_APP_API_URL;
+
 
   const isOnline = (id) => onlineUsers.includes(id);
 
   // Load message history
-  useEffect(() => {
-    if (!selectedChat || selectedChat.type === 'create-group') return;
-    setMessages([]);
-    setLoading(true);
+useEffect(() => {
+  if (!selectedChat || selectedChat.type === 'create-group') return;
+
+  setMessages([]);
+  setLoading(true);
 
   const url =
-  selectedChat.type === 'dm'
-    ? `${API}/api/messages/${user.id}/${selectedChat.id}`
-    : `${API}/api/messages/group/${selectedChat.id}`;
-    axios.get(url, { headers: { Authorization: `Bearer ${user.token}` } })
-      .then(r => setMessages(r.data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [selectedChat, user]);
+    selectedChat.type === 'dm'
+      ? `${BASE_URL}/api/messages/${user.id}/${selectedChat.id}`
+      : `${BASE_URL}/api/messages/group/${selectedChat.id}`;
+
+  axios.get(url, {
+    headers: { Authorization: `Bearer ${user.token}` }
+  })
+    .then(res => {
+      setMessages(res.data);
+    })
+    .catch(err => {
+      console.error(err);
+    })
+    .finally(() => {
+      setLoading(false);
+    });
+
+}, [selectedChat, user]);
 
   // Socket listeners for typing only
   useEffect(() => {
@@ -176,62 +185,104 @@ const API = process.env.REACT_APP_API_URL;
   if (!selectedChat || selectedChat.type === 'create-group') return null;
 
   const grouped = groupMessagesByDate(messages);
+  
 
   return (
-    <div className="chat-window">
-      {/* Header */}
-      <div className="chat-header">
-        <div className="avatar-wrap">
-          <div className="avatar" style={{ width: 40, height: 40, fontSize: 14, background: 'rgba(124,106,255,0.2)', color: '#a99fff' }}>
-            {getInitials(selectedChat.name)}
-          </div>
-          {selectedChat.type === 'dm' && (
-            <div className={`status-dot ${isOnline(selectedChat.id) ? 'online' : 'offline'}`} />
+  <div className="chat-window">
+
+    {/* Header */}
+    <div className="chat-header">
+      <div className="avatar-wrap">
+        <div
+          className="avatar"
+          style={{
+            width: 40,
+            height: 40,
+            fontSize: 14,
+            background: 'rgba(124,106,255,0.2)',
+            color: '#a99fff'
+          }}
+        >
+          {getInitials(selectedChat.name)}
+        </div>
+
+        {selectedChat.type === 'dm' && (
+          <div
+            className={`status-dot ${
+              isOnline(selectedChat.id) ? 'online' : 'offline'
+            }`}
+          />
+        )}
+      </div>
+
+      <div className="chat-header-info">
+        <div className="chat-header-name">
+          {selectedChat.name}
+
+          {selectedChat.type === 'dm' && isOnline(selectedChat.id) && (
+            <span className="online-pill">Online</span>
+          )}
+
+          {selectedChat.type === 'group' && (
+            <span className="group-pill">Group</span>
           )}
         </div>
-        <div className="chat-header-info">
-          <div className="chat-header-name">
-            {selectedChat.name}
-            {selectedChat.type === 'dm' && isOnline(selectedChat.id) && (
-              <span className="online-pill">Online</span>
-            )}
-            {selectedChat.type === 'group' && (
-              <span className="group-pill">Group</span>
-            )}
-          </div>
-          <div className="chat-header-sub">
-            {selectedChat.type === 'dm'
-              ? isOnline(selectedChat.id) ? 'Active now' : 'Offline'
-              : `${selectedChat.members?.length || 0} members`
-            }
-          </div>
-        </div>
-        <div className="header-actions">
-          {selectedMessages.length > 0 ? (
-            <>
-              <span className="selection-count">{selectedMessages.length} selected</span>
-              <button className="delete-selected-btn" onClick={handleDeleteSelected}>Delete</button>
-              <button className="cancel-select-btn" onClick={() => setSelectedMessages([])}>Cancel</button>
-            </>
-          ) : (
-            <>
-              <button className="icon-btn">📞</button>
-              <button className="icon-btn">🔍</button>
-              <button className="icon-btn">⋯</button>
-            </>
-          )}
+
+        <div className="chat-header-sub">
+          {selectedChat.type === 'dm'
+            ? isOnline(selectedChat.id)
+              ? 'Active now'
+              : 'Offline'
+            : `${selectedChat.members?.length || 0} members`}
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="messages-area">
-        {loading ? (
-          <div className="messages-loading">
-            <div className="loading-dots"><span/><span/><span/></div>
+      <div className="header-actions">
+        {selectedMessages.length > 0 ? (
+          <>
+            <span className="selection-count">
+              {selectedMessages.length} selected
+            </span>
+            <button
+              className="delete-selected-btn"
+              onClick={handleDeleteSelected}
+            >
+              Delete
+            </button>
+            <button
+              className="cancel-select-btn"
+              onClick={() => setSelectedMessages([])}
+            >
+              Cancel
+            </button>
+          </>
+        ) : (
+          <>
+            <button className="icon-btn">📞</button>
+            <button className="icon-btn">🔍</button>
+            <button className="icon-btn">⋯</button>
+          </>
+        )}
+      </div>
+    </div>
+
+    {/* Messages */}
+    <div className="messages-area">
+      {loading ? (
+        <div className="messages-loading">
+          <div className="loading-dots">
+            <span />
+            <span />
+            <span />
           </div>
-        ) : grouped.map((group, gi) => (
+        </div>
+      ) : (
+        grouped.map((group, gi) => (
           <div key={gi}>
-            <div className="date-divider"><span>{group.date}</span></div>
+            <div className="date-divider">
+              <span>{group.date}</span>
+            </div>
+
             {group.messages.map((msg, mi) => {
               const isOwn = msg.senderId === user.id;
               const prevMsg = group.messages[mi - 1];
@@ -239,38 +290,73 @@ const API = process.env.REACT_APP_API_URL;
               const sameAsPrev = prevMsg?.senderId === msg.senderId;
               const sameAsNext = nextMsg?.senderId === msg.senderId;
               const showAvatar = !isOwn && !sameAsNext;
-              const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+              const time = new Date(msg.timestamp).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+              });
 
               return (
-                <div key={msg._id || mi} className={`msg-row ${isOwn ? 'out' : 'in'} ${selectedMessages.includes(msg._id) ? 'selected' : ''}`}>
+                <div
+                  key={msg._id || mi}
+                  className={`msg-row ${isOwn ? 'out' : 'in'} ${
+                    selectedMessages.includes(msg._id) ? 'selected' : ''
+                  }`}
+                >
                   <button
-                    className={`message-select-btn ${selectedMessages.includes(msg._id) ? 'selected' : ''}`}
+                    className={`message-select-btn ${
+                      selectedMessages.includes(msg._id) ? 'selected' : ''
+                    }`}
                     onClick={() => toggleMessageSelection(msg._id)}
-                    title="Select message"
                   >
                     {selectedMessages.includes(msg._id) ? '✓' : '○'}
                   </button>
+
                   {!isOwn && (
-                    <div className={`msg-avatar ${showAvatar ? '' : 'invisible'}`}
-                      style={{ background: 'rgba(124,106,255,0.2)', color: '#a99fff' }}>
-                      {showAvatar ? getInitials(msg.senderName) : ''}
+                    <div
+                      className={`msg-avatar ${
+                        showAvatar ? '' : 'invisible'
+                      }`}
+                      style={{
+                        background: 'rgba(124,106,255,0.2)',
+                        color: '#a99fff'
+                      }}
+                    >
+                      {showAvatar
+                        ? getInitials(msg.senderName)
+                        : ''}
                     </div>
                   )}
+
                   <div className="msg-group">
-                    {!isOwn && !sameAsPrev && selectedChat.type === 'group' && (
-                      <div className="msg-sender-name">{msg.senderName}</div>
-                    )}
-                    <div className={`bubble ${isOwn ? 'out' : 'in'} ${sameAsPrev ? 'no-top-r' : ''} ${sameAsNext ? 'no-bot-r' : ''}`}>
+                    {!isOwn &&
+                      !sameAsPrev &&
+                      selectedChat.type === 'group' && (
+                        <div className="msg-sender-name">
+                          {msg.senderName}
+                        </div>
+                      )}
+
+                    <div
+                      className={`bubble ${isOwn ? 'out' : 'in'}`}
+                    >
                       {msg.message}
                     </div>
-                    {(!sameAsNext || mi === group.messages.length - 1) && (
+
+                    {(!sameAsNext ||
+                      mi === group.messages.length - 1) && (
                       <div className="bubble-meta">
                         <span>{time}</span>
-                        {isOwn && <span className="tick read">✓✓</span>}
+
+                        {isOwn && (
+                          <span className="tick read">✓✓</span>
+                        )}
+
                         <button
                           className="delete-msg-btn"
-                          onClick={() => handleDeleteMessage(msg._id)}
-                          title="Delete message"
+                          onClick={() =>
+                            handleDeleteMessage(msg._id)
+                          }
                         >
                           🗑
                         </button>
@@ -281,44 +367,73 @@ const API = process.env.REACT_APP_API_URL;
               );
             })}
           </div>
-        ))}
+        ))
+      )}
+    </div>
+
+    {/* Typing */}
+    {isTyping && (
+      <div className="msg-row in">
+        <div
+          className="msg-avatar"
+          style={{
+            background: 'rgba(124,106,255,0.2)',
+            color: '#a99fff'
+          }}
+        >
+          {getInitials(selectedChat.name)}
+        </div>
+
+        <div className="typing-bubble">
+          <div className="typing-dot" />
+          <div className="typing-dot" />
+          <div className="typing-dot" />
+          {typingUser && (
+            <span className="typing-name">
+              {typingUser} is typing
+            </span>
+          )}
+        </div>
+      </div>
+    )}
+
+    <div ref={bottomRef} />
+
+    {/* Input */}
+    <div className="input-area">
+      <div className="input-row">
+        <textarea
+          ref={textareaRef}
+          className="msg-input"
+          placeholder={`Message ${selectedChat.name}...`}
+          value={input}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          rows={1}
+        />
+
+        <div className="input-actions">
+          <button className="attach-btn">📎</button>
+          <button className="attach-btn">😊</button>
+          <button
+            className="send-btn"
+            onClick={sendMessage}
+            disabled={!input.trim()}
+          >
+            ➤
+          </button>
+        </div>
       </div>
 
-        {isTyping && (
-          <div className="msg-row in">
-            <div className="msg-avatar" style={{ background: 'rgba(124,106,255,0.2)', color: '#a99fff' }}>
-              {getInitials(selectedChat.name)}
-            </div>
-            <div className="typing-bubble">
-              <div className="typing-dot" /><div className="typing-dot" /><div className="typing-dot" />
-              {typingUser && <span className="typing-name">{typingUser} is typing</span>}
-            </div>
-          </div>
-        )}
-        <div ref={bottomRef} />
-
-      {/* Input */}
-      <div className="input-area">
-        <div className="input-row">
-          <textarea
-            ref={textareaRef}
-            className="msg-input"
-            placeholder={`Message ${selectedChat.name}...`}
-            value={input}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            rows={1}
-          />
-          <div className="input-actions">
-            <button className="attach-btn">📎</button>
-            <button className="attach-btn">😊</button>
-            <button className="send-btn" onClick={sendMessage} disabled={!input.trim()}>➤</button>
-          </div>
-        </div>
-        <div className="input-hint">Enter to send · Shift+Enter for new line</div>
+      <div className="input-hint">
+        Enter to send · Shift+Enter for new line
       </div>
     </div>
-  );
+
+  </div>
+);
+   
 }
 
 export default ChatWindow;
+
