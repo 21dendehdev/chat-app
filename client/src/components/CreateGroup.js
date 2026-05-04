@@ -21,10 +21,11 @@ function CreateGroup({ user, contacts, socket, onGroupCreated, onCancel }) {
     if (!groupName.trim()) { setError('Please enter a group name.'); return; }
     if (selected.length < 1) { setError('Add at least one member.'); return; }
 
+const API = process.env.REACT_APP_API_URL;
     setLoading(true); setError('');
     try {
       const members = [...selected.map(c => c._id), user.id];
-      const res = await axios.post('http://localhost:5000/api/groups', {
+      const res = await axios.post('${API}/api/groups', {
         name: groupName.trim(), members, createdBy: user.id
       }, { headers: { Authorization: `Bearer ${user.token}` } });
 

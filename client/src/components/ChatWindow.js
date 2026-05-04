@@ -12,6 +12,7 @@ function ChatWindow({ user, selectedChat, socket, onlineUsers, messages, setMess
   const bottomRef = useRef(null);
   const typingTimeout = useRef(null);
   const textareaRef = useRef(null);
+const API = process.env.REACT_APP_API_URL;
 
   const isOnline = (id) => onlineUsers.includes(id);
 
@@ -21,10 +22,10 @@ function ChatWindow({ user, selectedChat, socket, onlineUsers, messages, setMess
     setMessages([]);
     setLoading(true);
 
-    const url = selectedChat.type === 'dm'
-      ? `http://localhost:5000/api/messages/${user.id}/${selectedChat.id}`
-      : `http://localhost:5000/api/messages/group/${selectedChat.id}`;
-
+  const url =
+  selectedChat.type === 'dm'
+    ? `${API}/api/messages/${user.id}/${selectedChat.id}`
+    : `${API}/api/messages/group/${selectedChat.id}`;
     axios.get(url, { headers: { Authorization: `Bearer ${user.token}` } })
       .then(r => setMessages(r.data))
       .catch(() => {})

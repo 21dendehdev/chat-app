@@ -10,6 +10,8 @@ function SettingsPanel({ user, onClose, onUserUpdate, onLogout }) {
     newPassword: '',
     confirmPassword: ''
   });
+  
+  const API = process.env.REACT_APP_API_URL;
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const fileInputRef = useRef(null);
@@ -38,7 +40,7 @@ function SettingsPanel({ user, onClose, onUserUpdate, onLogout }) {
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/users/upload-avatar/${user.id}`,
+        `${API}//api/users/upload-avatar/${user.id}`,
         data,
         {
           headers: {
@@ -87,7 +89,7 @@ function SettingsPanel({ user, onClose, onUserUpdate, onLogout }) {
 
     setLoading(true);
     try {
-      await axios.put("http://localhost:5000/api/users/password", {
+      await axios.put(`${API}/api/users/password", {
         userId: user.id,
         oldPassword: formData.oldPassword,
         newPassword: formData.newPassword

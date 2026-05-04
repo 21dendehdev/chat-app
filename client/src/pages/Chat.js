@@ -93,7 +93,7 @@ function Chat({ user, onLogout, onUserUpdate }) {
 useEffect(() => {
   const API = process.env.REACT_APP_API_URL;
 
-  axios.get(`${API}/api/users`, {
+  axios.get(`${API}/api/users`), {
     headers: { Authorization: `Bearer ${user.token}` }
   })
     .then(r => setContacts(r.data.filter(u => u._id !== user.id)))
@@ -102,7 +102,7 @@ useEffect(() => {
 
   // Load groups
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/groups/user/${user.id}`, {
+    axios.get((`${API}/api/groups/user/${user.id}`, {
       headers: { Authorization: `Bearer ${user.token}` }
     })
       .then(r => {
@@ -126,7 +126,7 @@ useEffect(() => {
   };
 
   const handleRefreshUsers = () => {
-    axios.get('http://localhost:5000/api/users', {
+    axios.get((`${API}/api/users', {
       headers: { Authorization: `Bearer ${user.token}` }
     })
       .then(r => setContacts(r.data.filter(u => u._id !== user.id)))
