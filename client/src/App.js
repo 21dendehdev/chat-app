@@ -5,33 +5,40 @@ import AdminDashboard from './AdminDashboard';
 import './App.css';
 
 function App() {
-  const [user, setUser]         = useState(null);
+  const [user, setUser] = useState(null);
   const [viewAdmin, setViewAdmin] = useState(false);
+
+  const API = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const saved = localStorage.getItem('campchat_user');
     if (saved) {
-      try { setUser(JSON.parse(saved)); } catch {}
+      try {
+        setUser(JSON.parse(saved));
+      } catch {}
     }
   }, []);
 
   const handleLogin = (userData) => {
     setUser(userData);
     localStorage.setItem('campchat_user', JSON.stringify(userData));
-    // Auto-open admin dashboard if admin
     if (userData.isAdmin) setViewAdmin(true);
   };
 
   const handleLogout = async () => {
+  const API = process.env.REACT_APP_API_URL;
     if (user) {
       try {
-        await fetch('/api/auth/logout', {
+        await fetch(`${API}/api/auth/logout`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: user.id })
         });
-      } catch {}
+      } catch (err) {
+        console.log("Logout error:", err);
+      }
     }
+
     setUser(null);
     setViewAdmin(false);
     localStorage.removeItem('campchat_user');
@@ -44,7 +51,6 @@ function App() {
 
   if (!user) return <Login onLogin={handleLogin} />;
 
-  // Admin can toggle between dashboard and chat
   if (user.isAdmin && viewAdmin) {
     return (
       <AdminDashboard

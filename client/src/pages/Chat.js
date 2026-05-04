@@ -29,7 +29,9 @@ function Chat({ user, onLogout, onUserUpdate }) {
 
   // Init socket - runs only once
   useEffect(() => {
-    const socket = io('http://localhost:5000', { auth: { token: user.token } });
+   const socket = io(process.env.REACT_APP_API_URL, {
+  auth: { token: user.token }
+});
     socketRef.current = socket;
 
     socket.emit('register_user', user.id);
@@ -88,13 +90,15 @@ function Chat({ user, onLogout, onUserUpdate }) {
   }, [user.token]);
 
   // Load contacts
-  useEffect(() => {
-    axios.get('http://localhost:5000/api/users', {
-      headers: { Authorization: `Bearer ${user.token}` }
-    })
-      .then(r => setContacts(r.data.filter(u => u._id !== user.id)))
-      .catch(() => {});
-  }, [user]);
+useEffect(() => {
+  const API = process.env.REACT_APP_API_URL;
+
+  axios.get(`${API}/api/users`, {
+    headers: { Authorization: `Bearer ${user.token}` }
+  })
+    .then(r => setContacts(r.data.filter(u => u._id !== user.id)))
+    .catch(() => {});
+}, [user]);
 
   // Load groups
   useEffect(() => {
