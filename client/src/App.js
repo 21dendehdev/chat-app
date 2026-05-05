@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
-import Login from './pages/Login';
-import Chat from './pages/Chat';
-import AdminDashboard from './AdminDashboard';
+//import Login from "./pages/Login";
+import Chat from "./pages/Chat";
+import ChatWindow from './pages/Chat';
+import Sidebar from './components/Sidebar';
 import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
-  const [viewAdmin, setViewAdmin] = useState(false);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const API = import.meta.env.VITE_API_URL;
+  const API = process.env.REACT_APP_API_URL; // FIXED (no VITE)
 
   useEffect(() => {
     const saved = localStorage.getItem('campchat_user');
@@ -22,11 +24,9 @@ function App() {
   const handleLogin = (userData) => {
     setUser(userData);
     localStorage.setItem('campchat_user', JSON.stringify(userData));
-    if (userData.isAdmin) setViewAdmin(true);
   };
 
   const handleLogout = async () => {
-  const API = process.env.REACT_APP_API_URL;
     if (user) {
       try {
         await fetch(`${API}/api/auth/logout`, {
@@ -35,38 +35,68 @@ function App() {
           body: JSON.stringify({ userId: user.id })
         });
       } catch (err) {
-        console.log("Logout error:", err);
+        console.log(err);
       }
     }
 
     setUser(null);
-    setViewAdmin(false);
+    setSelectedChat(null);
     localStorage.removeItem('campchat_user');
   };
 
-  const handleUserUpdate = (updated) => {
-    setUser(updated);
-    localStorage.setItem('campchat_user', JSON.stringify(updated));
-  };
-
-  if (!user) return <Login onLogin={handleLogin} />;
-
-  if (user.isAdmin && viewAdmin) {
-    return (
-      <AdminDashboard
-        user={user}
-        onExitAdmin={() => setViewAdmin(false)}
-      />
-    );
+  if (!user) {
+    return <Auth onLogin={handleLogin} />;
   }
 
   return (
-    <Chat
-      user={user}
-      onLogout={handleLogout}
-      onUserUpdate={handleUserUpdate}
-      onOpenAdmin={user.isAdmin ? () => setViewAdmin(true) : null}
-    />
+    <div className="app-shell">
+
+      {/* SIDEBAR BACKDROP (MOBILE) */}
+      <div
+        className={`sidebar-backdrop ${sidebarOpen ? 'is-open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+
+      <div className="chat-shell">
+
+        {/* SIDEBAR */}
+        <Sidebar
+          user={user}
+          selectedChat={selectedChat}
+          onSelectChat={(chat) => {
+            setSelectedChat(chat);
+            setSidebarOpen(false); // close on mobile
+          }}
+          onLogout={handleLogout}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+
+        {/* MAIN AREA */}
+        <div className="main-area">
+
+          {/* MOBILE TOP BAR BUTTON */}
+          <button
+            className="sidebar-toggle"
+            onClick={() => setSidebarOpen(true)}
+          >
+            ☰
+          </button>
+
+          {selectedChat ? (
+            <ChatWindow user={user} selectedChat={selectedChat} />
+          ) : (
+            <div className="empty-chat">
+              <div className="empty-chat-inner">
+                <h2>Welcome 👋</h2>
+                <p>Select a chat to start messaging</p>
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import Auth from "./pages/Auth";
 
 function Login({ onLogin }) {
   const API = process.env.REACT_APP_API_URL;
