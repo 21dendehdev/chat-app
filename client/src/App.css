@@ -3,26 +3,24 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:      #0f0f13;
-  --bg2:     #16161e;
-  --bg3:     #1e1e2a;
-  --bg4:     #252535;
-  --border:  rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.13);
-  --accent:  #7c6aff;
-  --accent2: #5e4fe0;
-  --accent-g: rgba(124,106,255,0.15);
-  --text:    #eeeef5;
-  --text2:   #9999b0;
-  --text3:   #55556a;
-  --green:   #3ecf8e;
-  --red:     #ff6b6b;
-  --font:    'DM Sans', sans-serif;
-  --r:       16px;
-  --rs:      10px;
+  --bg:      #1a0f05;
+  --bg2:     #2a1708;
+  --bg3:     #3a1f0a;
+  --bg4:     #4a270c;
+
+  --accent:  orange;   /* ORANGE */
+  --accent2: #e56700;
+
+  --text:    #ffffff;   /* WHITE */
+  --text2:   #ffe0c2;
+  --text3:   #ffb070;
+
+  --border:  rgba(255,255,255,0.1);
+  --border2: rgba(255,255,255,0.2);
+}
 
   /* Sidebar width tokens — easy to change in one place */
-  --sidebar-w: 300px;
+  {--sidebar-w: 300px;
   --sidebar-w-sm: 72px;   /* icon-only collapsed on small tablets */
 }
 
@@ -33,8 +31,8 @@ html, body, #root {
   margin: 0;
   padding: 0;
   font-family: var(--font);
-  background: var(--bg);
-  color: var(--text);
+  background: orange;
+  color: white;
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -338,39 +336,125 @@ html, body, #root {
 
 
 /* ════════════════════════════════════════
-   CHAT WINDOW FIX
-════════════════════════════════════════ */
-.chat-window {
+   .chat-window {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
   height: 100%;
+  background: var(--bg);
+  overflow: hidden;
 }
 
-/* IMPORTANT: DO NOT hide empty chat on mobile */
+/* EMPTY CHAT UI */
 .empty-chat {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg);
+  color: var(--text);
 }
 
-/* ════════════════════════════════════════
-   TOUCH IMPROVEMENTS
-════════════════════════════════════════ */
+.empty-chat-inner {
+  text-align: center;
+  padding: 20px;
+}
+
+.empty-logo-dot {
+  width: 14px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  box-shadow: 0 0 12px var(--accent);
+}
+
+/* TOUCH IMPROVEMENTS */
 .contact-item,
 .sidebar-tab,
 .auth-btn,
-.send-btn {
+.send-btn,
+.icon-btn,
+.logout-btn {
   min-height: 44px;
+  cursor: pointer;
 }
 
-/* Make text always visible */
+/* TEXT VISIBILITY FIX */
 .logo-text,
 .contact-info,
 .footer-name,
-.footer-status {
-  display: block !important;
+.footer-status,
+.contact-name {
+  display: block;
+  color: var(--text);
+}
+
+/* SIDEBAR LIST SCROLL */
+.contact-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ACTIVE ITEM */
+.contact-item.active {
+  background: var(--bg3);
+  border-left: 3px solid var(--accent);
+}
+
+/* ===========================
+   USER PROFILE / STATUS UI (NEW)
+=========================== */
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  font-weight: bold;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.user-status {
+  font-size: 12px;
+  color: var(--text2);
+}
+
+/* SESSION UI (OPTIONAL DISPLAY PANEL) */
+.session-panel {
+  padding: 10px;
+  border-top: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.session-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  color: var(--text2);
 }

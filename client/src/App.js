@@ -1,23 +1,16 @@
 import { useState, useEffect } from 'react';
-//import Login from "./pages/Login";
-import Chat from "./pages/Chat";
-import ChatWindow from './pages/Chat';
-import Sidebar from './components/Sidebar';
+import Login from './pages/Login';
+import Chat from './pages/Chat';
 import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
-  const [selectedChat, setSelectedChat] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const API = process.env.REACT_APP_API_URL; // FIXED (no VITE)
+  const API = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const saved = localStorage.getItem('campchat_user');
     if (saved) {
-      try {
-        setUser(JSON.parse(saved));
-      } catch {}
+      try { setUser(JSON.parse(saved)); } catch {}
     }
   }, []);
 
@@ -34,69 +27,25 @@ function App() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: user.id })
         });
-      } catch (err) {
-        console.log(err);
-      }
+      } catch (err) { console.log(err); }
     }
-
     setUser(null);
-    setSelectedChat(null);
     localStorage.removeItem('campchat_user');
   };
 
-  if (!user) {
-    return <Auth onLogin={handleLogin} />;
-  }
+  const handleUserUpdate = (updatedUser) => {
+    setUser(updatedUser);
+    localStorage.setItem('campchat_user', JSON.stringify(updatedUser));
+  };
+
+  if (!user) return <Login onLogin={handleLogin} />;
 
   return (
-    <div className="app-shell">
-
-      {/* SIDEBAR BACKDROP (MOBILE) */}
-      <div
-        className={`sidebar-backdrop ${sidebarOpen ? 'is-open' : ''}`}
-        onClick={() => setSidebarOpen(false)}
-      />
-
-      <div className="chat-shell">
-
-        {/* SIDEBAR */}
-        <Sidebar
-          user={user}
-          selectedChat={selectedChat}
-          onSelectChat={(chat) => {
-            setSelectedChat(chat);
-            setSidebarOpen(false); // close on mobile
-          }}
-          onLogout={handleLogout}
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-        />
-
-        {/* MAIN AREA */}
-        <div className="main-area">
-
-          {/* MOBILE TOP BAR BUTTON */}
-          <button
-            className="sidebar-toggle"
-            onClick={() => setSidebarOpen(true)}
-          >
-            ☰
-          </button>
-
-          {selectedChat ? (
-            <ChatWindow user={user} selectedChat={selectedChat} />
-          ) : (
-            <div className="empty-chat">
-              <div className="empty-chat-inner">
-                <h2>Welcome 👋</h2>
-                <p>Select a chat to start messaging</p>
-              </div>
-            </div>
-          )}
-
-        </div>
-      </div>
-    </div>
+    <Chat
+      user={user}
+      onLogout={handleLogout}
+      onUserUpdate={handleUserUpdate}
+    />
   );
 }
 

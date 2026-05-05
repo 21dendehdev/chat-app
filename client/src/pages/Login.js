@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import axios from 'axios';
-import Auth from "./pages/Auth";
 
 function Login({ onLogin }) {
   const API = process.env.REACT_APP_API_URL;
-  console.log("API URL:", process.env.REACT_APP_API_URL);
 
   const [tab, setTab] = useState('login');
   const [loginData, setLoginData] = useState({ username: '', password: '' });
@@ -72,8 +70,6 @@ function Login({ onLogin }) {
 
       setSuccess('Account created! You can now log in.');
       setTab('login');
-      setLoginData({ username: registerData.username, password: '' });
-      setRegisterData({ username: '', password: '', confirm: '' });
 
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed.');
@@ -82,71 +78,109 @@ function Login({ onLogin }) {
     }
   };
 
-  const handleKey = (e, action) => {
-    if (e.key === 'Enter') action();
-  };
-
   return (
     <div className="auth-shell">
+
       <div className="auth-card">
 
+        {/* Tabs */}
         <div className="auth-tabs">
-          <button onClick={() => setTab('login')}>Login</button>
-          <button onClick={() => setTab('register')}>Register</button>
+          <button
+            className={`auth-tab ${tab === 'login' ? 'active' : ''}`}
+            onClick={() => setTab('login')}
+          >
+            Login
+          </button>
+
+          <button
+            className={`auth-tab ${tab === 'register' ? 'active' : ''}`}
+            onClick={() => setTab('register')}
+          >
+            Register
+          </button>
+
+          <div className={`auth-tab-indicator ${tab === 'login' ? 'left' : 'right'}`} />
         </div>
 
-        {tab === 'login' ? (
-          <>
-            <input
-              value={loginData.username}
-              onChange={e => setLoginData({ ...loginData, username: e.target.value })}
-              onKeyDown={e => handleKey(e, loginUser)}
-              placeholder="Username"
-            />
+        {/* Form */}
+        <div className="auth-form">
 
-            <input
-              type={showPass ? 'text' : 'password'}
-              value={loginData.password}
-              onChange={e => setLoginData({ ...loginData, password: e.target.value })}
-              onKeyDown={e => handleKey(e, loginUser)}
-              placeholder="Password"
-            />
+          {tab === 'login' ? (
+            <>
+              <div className="input-group">
+                <label className="input-label">Username</label>
+                <input
+                  className="auth-input"
+                  value={loginData.username}
+                  onChange={e => setLoginData({ ...loginData, username: e.target.value })}
+                  placeholder="Enter username"
+                />
+              </div>
 
-            <button onClick={loginUser} disabled={loading}>
-              {loading ? 'Loading...' : 'Login'}
-            </button>
-          </>
-        ) : (
-          <>
-            <input
-              value={registerData.username}
-              onChange={e => setRegisterData({ ...registerData, username: e.target.value })}
-              placeholder="Username"
-            />
+              <div className="input-group input-password-wrap">
+                <label className="input-label">Password</label>
+                <input
+                  className="auth-input"
+                  type={showPass ? 'text' : 'password'}
+                  value={loginData.password}
+                  onChange={e => setLoginData({ ...loginData, password: e.target.value })}
+                  placeholder="Enter password"
+                />
+                <button
+                  className="show-pass-btn"
+                  onClick={() => setShowPass(!showPass)}
+                  type="button"
+                >
+                  👁
+                </button>
+              </div>
 
-            <input
-              type="password"
-              value={registerData.password}
-              onChange={e => setRegisterData({ ...registerData, password: e.target.value })}
-              placeholder="Password"
-            />
+              <button className="auth-btn" onClick={loginUser} disabled={loading}>
+                {loading ? <span className="spinner"></span> : 'Login'}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="input-group">
+                <label className="input-label">Username</label>
+                <input
+                  className="auth-input"
+                  value={registerData.username}
+                  onChange={e => setRegisterData({ ...registerData, username: e.target.value })}
+                />
+              </div>
 
-            <input
-              type="password"
-              value={registerData.confirm}
-              onChange={e => setRegisterData({ ...registerData, confirm: e.target.value })}
-              onKeyDown={e => handleKey(e, registerUser)}
-              placeholder="Confirm Password"
-            />
+              <div className="input-group">
+                <label className="input-label">Password</label>
+                <input
+                  className="auth-input"
+                  type="password"
+                  value={registerData.password}
+                  onChange={e => setRegisterData({ ...registerData, password: e.target.value })}
+                />
+              </div>
 
-            <button onClick={registerUser} disabled={loading}>
-              {loading ? 'Loading...' : 'Register'}
-            </button>
-          </>
-        )}
+              <div className="input-group">
+                <label className="input-label">Confirm Password</label>
+                <input
+                  className="auth-input"
+                  type="password"
+                  value={registerData.confirm}
+                  onChange={e => setRegisterData({ ...registerData, confirm: e.target.value })}
+                />
+              </div>
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        {success && <p style={{ color: 'green' }}>{success}</p>}
+              <button className="auth-btn" onClick={registerUser} disabled={loading}>
+                {loading ? <span className="spinner"></span> : 'Register'}
+              </button>
+            </>
+          )}
+
+          {error && <div className="auth-message error">{error}</div>}
+          {success && <div className="auth-message success">{success}</div>}
+
+        </div>
+
       </div>
     </div>
   );
