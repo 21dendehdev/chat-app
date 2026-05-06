@@ -2,6 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import BASE_URL from '../config';
 
+function getInitials(name) {
+  if (!name) return "?";
+  return name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+}
+
 function ChatWindow({ user, selectedChat, socket, onlineUsers, messages, setMessages }) {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
