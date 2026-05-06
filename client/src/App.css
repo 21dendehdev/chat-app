@@ -41,22 +41,22 @@ html, body, #root {
 ════════════════════════════════════════ */
 /* ===== ROOT CONTAINER ===== */
 .auth-shell {
-  min-height: 100vh;
+  min-height: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: orange;
-  padding: 16px;
+  background: black;
+  padding: 16%;
 }
 
 /* ===== CARD ===== */
 .auth-card {
   width: 100%;
-  max-width: 420px;
-  background: brown;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  max-width: 50%;
+  background: orange;
+  border-radius: 15px;
+  padding: 10%;
+  box-shadow: 50%;
 }
 
 /* ===== LOGO ===== */
