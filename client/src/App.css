@@ -40,23 +40,22 @@ html, body, #root {
 ════════════════════════════════════════ */
 /* ===== ROOT CONTAINER ===== */
 .auth-shell {
-  min-height: 50%;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   background: black;
-  padding: 16%;
-}
+  padding:30px; }
 
 /* ===== CARD ===== */
 .auth-card {
-  width: 400px;
-  max-width:50%;
+  width: 50%;
+  max-width:60%;
   background: orange;
   border-radius: 15px;
-  padding: 20px;
+  padding:15px;
   margin: 40px;
-  box-shadow: 50%;
+  box-shadow: 10px;
 }
 
 /* ===== LOGO ===== */
@@ -64,13 +63,13 @@ html, body, #root {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 15px;
 }
 
 .auth-logo-dot {
   width: 12px;
   height: 12px;
-  background: #2563eb;
+  background: grey;
   border-radius: 50%;
 }
 
@@ -82,7 +81,7 @@ html, body, #root {
 .auth-tagline {
   text-align: center;
   font-size: 14px;
-  color: #666;
+  color: white;
   margin-bottom: 20px;
 }
 
@@ -90,7 +89,7 @@ html, body, #root {
 .auth-tabs {
   position: relative;
   display: flex;
-  background: #f1f5f9;
+  background:black;
   border-radius: 10px;
   margin-bottom: 20px;
   overflow: hidden;
@@ -114,7 +113,7 @@ html, body, #root {
   position: absolute;
   width: 50%;
   height: 100%;
-  background: #2563eb;
+  background:blue;
   border-radius: 10px;
   transition: 0.3s;
   z-index: 1;
@@ -143,14 +142,14 @@ html, body, #root {
 .input-label {
   font-size: 13px;
   margin-bottom: 4px;
-  color: #444;
+  color: white;
 }
 
 /* ===== INPUT ===== */
 .auth-input {
   padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  border-radius: 20px;
+  border: white;
   font-size: 15px;
   outline: none;
 }
@@ -211,7 +210,7 @@ html, body, #root {
 
 .auth-message.error {
   background: #fee2e2;
-  color: #991b1b;
+  color: red;
 }
 
 .auth-message.success {
@@ -239,8 +238,10 @@ html, body, #root {
 /* ===== 📱 MOBILE RESPONSIVENESS ===== */
 @media (max-width: 768px) {
   .auth-card {
-    padding: 5px;
-    border-radius: 11px;
+    padding:auto;
+    border-radius: 2px;
+    margin:auto;
+
   }
 
   .auth-logo-text {
@@ -256,8 +257,9 @@ html, body, #root {
 /* ===== 💻 LARGE SCREEN ===== */
 @media (min-width: 768px) {
   .auth-card {
-    padding: 32px;
-  }
+    padding: 10%;
+    margin: 10%;  
+  height: 50%;}
 }
 
 
