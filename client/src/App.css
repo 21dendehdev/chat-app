@@ -50,11 +50,12 @@ html, body, #root {
 
 /* ===== CARD ===== */
 .auth-card {
-  width: 100%;
-  max-width: 50%;
+  width: 400px;
+  max-width:50%;
   background: orange;
   border-radius: 15px;
-  padding: 10%;
+  padding: 20px;
+  margin: 40px;
   box-shadow: 50%;
 }
 
@@ -236,10 +237,10 @@ html, body, #root {
 }
 
 /* ===== 📱 MOBILE RESPONSIVENESS ===== */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .auth-card {
-    padding: 18px;
-    border-radius: 12px;
+    padding: 5px;
+    border-radius: 11px;
   }
 
   .auth-logo-text {
@@ -263,18 +264,7 @@ html, body, #root {
 /* ════════════════════════════════════════
  /* ════════════════════════════════════════
    CHAT SHELL (FIXED MOBILE FRIENDLY)
-════════════════════════════════════════ */
-.chat-shell {
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-}
-
-.main-area {
-  flex: 1;
-  display: flex;
-  min-width: 0;
-}
+═════════════════════════════
 
 /* ════════════════════════════════════════
   /* ════════════════════════════════════════
