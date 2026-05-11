@@ -1,18 +1,28 @@
-import { useState, useEffect, useRef } from 'react';
-import { io } from 'socket.io-client';
-import axios from 'axios';
-import Sidebar from '../components/Sidebar';
-import ChatWindow from '../components/ChatWindow';
-import CreateGroup from '../components/CreateGroup';
-import BASE_URL from '../config';
+
+import { useState, useEffect, useRef } from "react";
+import { io } from "socket.io-client";
+import axios from "axios";
+
+import BASE_URL from "../config";
+
+import BottomNav from "../components/BottomNav";
+import ContactsPanel from "../components/ContactsPanel";
+import ChatPanel from "../components/ChatPanel";
+import SettingsPanel from "../components/SettingsPanel";
 
 function Chat({ user, onLogout, onUserUpdate }) {
+
+  const [activeTab, setActiveTab] = useState("chats");
+
   const [contacts, setContacts] = useState([]);
   const [groups, setGroups] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
+
   const [selectedChat, setSelectedChat] = useState(null);
-  const [unreadCounts, setUnreadCounts] = useState({});
+
   const [messages, setMessages] = useState([]);
+  const [unreadCounts, setUnreadCounts] = useState({});
+
   const socketRef = useRef(null);
   const selectedChatRef = useRef(null);
 
@@ -20,164 +30,267 @@ function Chat({ user, onLogout, onUserUpdate }) {
     selectedChatRef.current = selectedChat;
   }, [selectedChat]);
 
+  /*
+   -----------------------------------
+   NOTIFICATION PERMISSION
+   -----------------------------------
+  */
+
   useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default') {
+    if (
+      "Notification" in window &&
+      Notification.permission === "default"
+    ) {
       Notification.requestPermission();
     }
   }, []);
 
+  /*
+   -----------------------------------
+   SOCKET CONNECTION
+   -----------------------------------
+  */
+
   useEffect(() => {
+
     const socket = io(process.env.REACT_APP_API_URL, {
-      auth: { token: user.token }
+      auth: {
+        token: user.token,
+      },
     });
 
     socketRef.current = socket;
-    socket.emit('register_user', user.id);
 
-    socket.on('online_users', setOnlineUsers);
+    socket.emit("register_user", user.id);
 
-    socket.on('receive_message', (data) => {
-      if (Notification.permission === 'granted') {
+    socket.on("online_users", setOnlineUsers);
+
+    /*
+     -----------------------------------
+     DIRECT MESSAGE RECEIVING
+     -----------------------------------
+    */
+
+    socket.on("receive_message", (data) => {
+
+      if (Notification.permission === "granted") {
         new Notification(`Message from ${data.senderName}`, {
           body: data.message.substring(0, 50),
-          icon: data.senderAvatar || undefined
+          icon: data.senderAvatar || undefined,
         });
       }
 
-      setMessages(prev => [...prev, data]);
+      setMessages((prev) => [...prev, data]);
 
-      setSelectedChat({
-        type: 'dm',
-        id: data.senderId,
-        name: data.senderName,
-        avatar: data.senderAvatar
-      });
-
-      setUnreadCounts(prev => ({
+      setUnreadCounts((prev) => ({
         ...prev,
-        [data.senderId]: 0
+        [data.senderId]:
+          selectedChatRef.current?.id === data.senderId
+            ? 0
+            : (prev[data.senderId] || 0) + 1,
       }));
     });
 
-    socket.on('receive_group_message', (data) => {
-      if (Notification.permission === 'granted') {
-        new Notification(`Message in ${data.groupName || 'Group'}`, {
-          body: `${data.senderName}: ${data.message.substring(0, 50)}`
-        });
+    /*
+     -----------------------------------
+     GROUP MESSAGE RECEIVING
+     -----------------------------------
+    */
+
+    socket.on("receive_group_message", (data) => {
+
+      if (Notification.permission === "granted") {
+        new Notification(
+          `Message in ${data.groupName || "Group"}`,
+          {
+            body: `${data.senderName}: ${data.message.substring(0, 50)}`,
+          }
+        );
       }
 
-      setMessages(prev => [...prev, data]);
+      setMessages((prev) => [...prev, data]);
 
       const isViewing =
-        selectedChatRef.current?.type === 'group' &&
+        selectedChatRef.current?.type === "group" &&
         selectedChatRef.current?.id === data.groupId;
 
-      setUnreadCounts(prev => ({
+      setUnreadCounts((prev) => ({
         ...prev,
-        [data.groupId]: isViewing ? 0 : (prev[data.groupId] || 0) + 1
+        [data.groupId]:
+          isViewing
+            ? 0
+            : (prev[data.groupId] || 0) + 1,
       }));
     });
 
     return () => socket.disconnect();
+
   }, [user]);
 
-  useEffect(() => {
-    axios.get(`${BASE_URL}/api/groups/user/${user.id}`, {
-      headers: { Authorization: `Bearer ${user.token}` }
-    })
-      .then(r => setContacts(r.data.filter(u => u._id !== user.id)))
-      .catch(() => {});
-  }, [user]);
+  /*
+   -----------------------------------
+   FETCH CONTACTS
+   -----------------------------------
+  */
 
-  useEffect(() => {
-    axios.get(`${BASE_URL}/api/groups/user/${user.id}`, {
-      headers: { Authorization: `Bearer ${user.token}` }
-    })
-      .then(r => {
-        setGroups(r.data);
-        r.data.forEach(g => socketRef.current?.emit('join_group', g._id));
-      })
-      .catch(() => {});
-  }, [user]);
+  const fetchContacts = async () => {
 
-  const handleSelectChat = (chat) => {
-    setSelectedChat(chat);
-    setMessages([]);
-    if (chat?.id) {
-      setUnreadCounts(prev => ({ ...prev, [chat.id]: 0 }));
+    try {
+
+      const response = await axios.get(
+        `${BASE_URL}/api/users`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`
+          }
+        }
+      );
+
+      const filteredUsers = response.data.filter(
+        (u) => u._id !== user.id
+      );
+
+      setContacts(filteredUsers);
+
+    } catch (error) {
+
+      console.log("Failed to fetch contacts", error);
+
     }
   };
 
-  const handleGroupCreated = (group) => {
-    setGroups(prev => [...prev, group]);
-    handleSelectChat({
-      type: 'group',
-      id: group._id,
-      name: group.name,
-      members: group.members
-    });
+  /*
+   -----------------------------------
+   FETCH GROUPS
+   -----------------------------------
+  */
+
+  const fetchGroups = async () => {
+
+    try {
+
+      const response = await axios.get(
+        `${BASE_URL}/api/groups/user/${user.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+
+      setGroups(response.data);
+
+      response.data.forEach((group) => {
+        socketRef.current?.emit(
+          "join_group",
+          group._id
+        );
+      });
+
+    } catch (error) {
+
+      console.log("Failed to fetch groups", error);
+
+    }
   };
 
-  const handleRefreshUsers = () => {
-    axios.get(`${BASE_URL}/api/groups/user/${user.id}`, {
-      headers: { Authorization: `Bearer ${user.token}` }
-    })
-      .then(r => setContacts(r.data.filter(u => u._id !== user.id)))
-      .catch(() => {});
-  };
+  /*
+   -----------------------------------
+   INITIAL FETCH
+   -----------------------------------
+  */
 
+  useEffect(() => {
+    fetchContacts();
+    fetchGroups();
+  }, []);
+
+  /*
+   -----------------------------------
+   SELECT CHAT
+   -----------------------------------
+  */
+
+  const handleSelectChat = (chat) => {
+
+    setSelectedChat(chat);
+
+    setMessages([]);
+
+    if (chat?.id) {
+      setUnreadCounts((prev) => ({
+        ...prev,
+        [chat.id]: 0,
+      }));
+    }
+
+    setActiveTab("chats");
+  }
   return (
-    <div className="chat-shell">
 
-      <Sidebar
-        user={user}
-        contacts={contacts}
-        groups={groups}
-        onlineUsers={onlineUsers}
-        unreadCounts={unreadCounts}
-        selectedChat={selectedChat}
-        onSelectChat={handleSelectChat}
-        onLogout={onLogout}
-        onRefreshUsers={handleRefreshUsers}
-        onUserUpdate={onUserUpdate}
-      />
+    <div className="chat-page">
 
-      <div className="main-area">
+      {/* -------------------------
+          MAIN CONTENT
+      ------------------------- */}
 
-        {!selectedChat && (
-          <div className="empty-chat">
-            <div className="empty-chat-inner">
-              <div className="empty-logo-dot" />
-              <h2>Welcome to CampChat</h2>
-              <p>Select a conversation or start a new one</p>
-            </div>
-          </div>
-        )}
+      <div className="page-content">
 
-        {selectedChat?.type === 'create-group' && (
-          <CreateGroup
+        {/* CHAT SCREEN */}
+
+        {activeTab === "chats" && (
+
+          <ChatPanel
             user={user}
-            contacts={contacts}
+            selectedChat={selectedChat}
             socket={socketRef.current}
-            onGroupCreated={handleGroupCreated}
-            onCancel={() => setSelectedChat(null)}
+            onlineUsers={onlineUsers}
+            messages={messages}
+            setMessages={setMessages}
           />
+
         )}
 
-        {selectedChat && selectedChat.type !== 'create-group' && (
-          <div className="chat-window">
-            <ChatWindow
-              user={user}
-              selectedChat={selectedChat}
-              socket={socketRef.current}
-              onlineUsers={onlineUsers}
-              messages={messages}
-              setMessages={setMessages}
-            />
-          </div>
+        {/* CONTACTS SCREEN */}
+
+        {activeTab === "contacts" && (
+
+          <ContactsPanel
+            contacts={contacts}
+            groups={groups}
+            onlineUsers={onlineUsers}
+            unreadCounts={unreadCounts}
+            selectedChat={selectedChat}
+            onSelectChat={handleSelectChat}
+            onRefreshUsers={fetchContacts}
+          />
+
+        )}
+
+
+        {/* SETTINGS SCREEN */}
+
+        {activeTab === "settings" && (
+
+          <SettingsPanel
+            user={user}
+            onLogout={onLogout}
+            onUserUpdate={onUserUpdate}
+          />
+
         )}
 
       </div>
+
+      {/* -------------------------
+          BOTTOM NAVIGATION
+      ------------------------- */}
+
+      <BottomNav
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+
     </div>
   );
 }
