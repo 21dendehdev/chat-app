@@ -44,14 +44,14 @@ html, body, #root {
   justify-content: center;
   align-items: center;
   background:whitesmoke;
-  padding:30px;
-margin:30px;
+  padding:30;
  }
 
 /* ===== CARD ===== */
 .auth-card {
   
-  max-width:100%;
+  width: 100%;
+  text-align: center;
   background: grey;
   border-radius: 20px;
   padding:25px;
@@ -235,7 +235,8 @@ background: orange;
 @media (max-width: 768px) {
   .auth-card {
     padding:auto;
-    border-radius: 2px;
+  
+    border-radius: 10%;
     margin:auto;
 
   }
