@@ -31,8 +31,7 @@ html, body, #root {
   font-family: var(--font);
   background: black;
   color: white;
-  overflow-x: hidden;
-  overflow-y: auto;
+  
 }
 
 /* ════════════════════════════════════════
@@ -40,22 +39,25 @@ html, body, #root {
 ════════════════════════════════════════ */
 /* ===== ROOT CONTAINER ===== */
 .auth-shell {
-  min-height: 100vh;
+  min-height: 100%;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: black;
-  padding:30px; }
+  background:white;
+  padding:30px;
+margin:30px;
+ }
 
 /* ===== CARD ===== */
 .auth-card {
-  width: 50%;
-  max-width:60%;
-  background: orange;
-  border-radius: 15px;
+  
+  max-width:100%;
+  background: black;
+  border-radius: 10%;
   padding:15px;
-  margin: 40px;
-  box-shadow: 10px;
+  
+
 }
 
 /* ===== LOGO ===== */
