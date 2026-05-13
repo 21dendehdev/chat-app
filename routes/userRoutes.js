@@ -99,4 +99,16 @@ router.put("/update/:id", async (req, res) => {
   }
 });
 
+
+
+const fetchUsers = async () => {
+  try {
+    const res = await axios.get("/api/users");
+
+    setContacts(res.data);
+
+  } catch (err) {
+    console.log(err);
+  }
+};
 module.exports = router;

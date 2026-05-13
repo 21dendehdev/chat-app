@@ -1,28 +1,127 @@
 const mongoose = require("mongoose");
 
 const sessionSchema = new mongoose.Schema({
-  loginTime:  { type: Date, default: Date.now },
-  logoutTime: { type: Date, default: null },
-  duration:   { type: Number, default: 0 } // seconds
+
+  loginTime: {
+    type: Date,
+    default: Date.now
+  },
+
+  logoutTime: {
+    type: Date,
+    default: null
+  },
+
+  duration: {
+    type: Number,
+    default: 0
+  } // seconds
+
 });
 
 const userSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  avatar:   { type: String, default: "" },
-  bio:      { type: String, default: "" },
-  isAdmin:  { type: Boolean, default: false },
 
-  // Contacts: only these users appear in each other's sidebar
-  contacts: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  /*
+   -----------------------------------
+   BASIC INFO
+   -----------------------------------
+  */
 
-  // Session tracking
-  sessions:       [sessionSchema],
-  lastLoginAt:    { type: Date, default: null },
-  totalTimeSpent: { type: Number, default: 0 }, // total seconds
-  isOnline:       { type: Boolean, default: false },
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
 
-  createdAt: { type: Date, default: Date.now }
+  telephone: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true
+  },
+
+  password: {
+    type: String,
+    required: true
+  },
+
+  /*
+   -----------------------------------
+   PROFILE
+   -----------------------------------
+  */
+
+  avatar: {
+    type: String,
+    default: ""
+  },
+
+  bio: {
+    type: String,
+    default: ""
+  },
+
+  /*
+   -----------------------------------
+   ROLE
+   -----------------------------------
+  */
+
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
+
+  /*
+   -----------------------------------
+   CONTACTS
+   -----------------------------------
+  */
+
+  contacts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    }
+  ],
+
+  /*
+   -----------------------------------
+   SESSION TRACKING
+   -----------------------------------
+  */
+
+  sessions: [sessionSchema],
+
+  lastLoginAt: {
+    type: Date,
+    default: null
+  },
+
+  totalTimeSpent: {
+    type: Number,
+    default: 0
+  },
+
+  isOnline: {
+    type: Boolean,
+    default: false
+  },
+
+  /*
+   -----------------------------------
+   CREATED DATE
+   -----------------------------------
+  */
+
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+
 });
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model(
+  "User",
+  userSchema
+);
