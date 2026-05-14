@@ -1,132 +1,104 @@
-const User = require("../models/User");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-/*
------------------------------------
-REGISTER
------------------------------------
-*/
+// GENERATE JWT TOKEN
+const generateToken = (id) => {
+  return jwt.sign(
+    { id },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "30d",
+    }
+  );
+};
 
-exports.register = async (req, res) => {
+// REGISTER USER
+export const registerUser = async (req, res) => {
   try {
+    const { name, telephone, password } = req.body;
 
-    let { name, telephone, password } = req.body;
+    // CHECK IF USER EXISTS
+    const userExists = await User.findOne({ telephone });
 
-    // normalize inputs
-    name = name?.trim();
-    telephone = telephone?.trim();
-    password = password?.trim();
-
-    console.log("REGISTER BODY:", req.body);
-
-    // validation
-    if (!name || !telephone || !password) {
+    if (userExists) {
       return res.status(400).json({
-        message: "All fields are required"
+        message: "Telephone already registered",
       });
     }
 
-    const existingUser = await User.findOne({ telephone });
+    // HASH PASSWORD
+    const salt = await bcrypt.genSalt(10);
 
-    if (existingUser) {
-      return res.status(400).json({
-        message: "Telephone already registered"
-      });
-    }
+    const hashedPassword = await bcrypt.hash(
+      password,
+      salt
+    );
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+    // CREATE USER
     const user = await User.create({
       name,
       telephone,
-      password: hashedPassword
+      password: hashedPassword,
     });
 
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    return res.status(201).json({
-      message: "User registered successfully",
-      token,
+    // RESPONSE
+    res.status(201).json({
       user: {
         _id: user._id,
         name: user.name,
-        telephone: user.telephone
-      }
+        telephone: user.telephone,
+      },
+
+      token: generateToken(user._id),
     });
-
   } catch (error) {
-    console.log("REGISTER ERROR:", error);
-
-    return res.status(500).json({
-      message: error.message || "Server error"
+    res.status(500).json({
+      message: error.message,
     });
   }
 };
 
-/*
------------------------------------
-LOGIN
------------------------------------
-*/
-
-exports.login = async (req, res) => {
+// LOGIN USER
+export const loginUser = async (req, res) => {
   try {
+    const { telephone, password } = req.body;
 
-    let { telephone, password } = req.body;
-
-    telephone = telephone?.trim();
-    password = password?.trim();
-
-    console.log("LOGIN BODY:", req.body);
-
-    if (!telephone || !password) {
-      return res.status(400).json({
-        message: "All fields are required"
-      });
-    }
-
+    // FIND USER
     const user = await User.findOne({ telephone });
 
+    // CHECK USER
     if (!user) {
-      return res.status(400).json({
-        message: "User not found"
+      return res.status(401).json({
+        message: "Invalid telephone or password",
       });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(400).json({
-        message: "Invalid credentials"
-      });
-    }
-
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+    // COMPARE PASSWORD
+    const isMatch = await bcrypt.compare(
+      password,
+      user.password
     );
 
-    return res.json({
-      message: "Login successful",
-      token,
+    if (!isMatch) {
+      return res.status(401).json({
+        message: "Invalid telephone or password",
+      });
+    }
+
+    // SUCCESS RESPONSE
+    res.status(200).json({
       user: {
         _id: user._id,
         name: user.name,
-        telephone: user.telephone
-      }
+        telephone: user.telephone,
+      },
+
+      token: generateToken(user._id),
     });
-
   } catch (error) {
-    console.log("LOGIN ERROR:", error);
-
-    return res.status(500).json({
-      message: error.message || "Server error"
+    res.status(500).json({
+      message: error.message,
     });
   }
 };
