@@ -1,6 +1,10 @@
+
+// This is the main App component that manages user authentication and routing between Login and Chat pages.
+
 import { useState, useEffect } from 'react';
 import Login from './pages/Login';
 import Chat from './pages/Chat';
+
 import './App.css';
 
 function App() {

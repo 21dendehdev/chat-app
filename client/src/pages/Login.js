@@ -1,131 +1,118 @@
+
+//This is the Login component that handles both user login and registration. It uses a form to collect user input and sends it to the backend API for authentication. The component also allows users to switch between login and registration modes.
+
 import { useState } from "react";
 import axios from "axios";
 import BASE_URL from "../config";
 
 function Login({ onLogin }) {
-
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState("");
   const [telephone, setTelephone] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
+  // ❌ VALIDATION CHECK
+  if (!validatePhone(telephone)) {
+    alert("Please enter a valid mobile number (8–15 digits only)");
+    return;
+  }
 
-      const endpoint = isLogin
-        ? "/api/auth/login"
-        : "/api/auth/register";
+  const endpoint = isLogin
+    ? "/api/auth/login"
+    : "/api/auth/register";
 
-      const payload = isLogin
-        ? { telephone, password }
-        : { name, telephone, password };
+  const payload = isLogin
+    ? { telephone, password }
+    : { name, telephone, password };
 
-      const response = await axios.post(
-        `${BASE_URL}${endpoint}`,
-        payload
-      );
+  try {
+    const res = await axios.post(`${BASE_URL}${endpoint}`, payload);
 
-      console.log("SERVER RESPONSE:", response.data);
+    onLogin({
+      id: res.data.user._id,
+      name: res.data.user.name,
+      telephone: res.data.user.telephone,
+      token: res.data.token,
+    });
 
-      // 🔥 SAFETY CHECK (IMPORTANT)
-      if (!response.data?.user || !response.data?.token) {
-        throw new Error("Invalid server response");
-      }
+  } catch (error) {
+    alert(error.response?.data?.message || "Login failed");
+  }
+};
 
-      const userData = {
-        id: response.data.user._id,
-        name: response.data.user.name,
-        telephone: response.data.user.telephone,
-        token: response.data.token
-      };
+    const endpoint = isLogin
+      ? "/api/auth/login"
+      : "/api/auth/register";
 
-      console.log("USER LOGGED IN:", userData);
+    const payload = isLogin
+      ? { telephone, password }
+      : { name, telephone, password };
 
-      onLogin(userData);
+    const res = await axios.post(`${BASE_URL}${endpoint}`, payload);
 
-    } catch (error) {
-
-      console.log("LOGIN ERROR:", error);
-
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        "Authentication failed";
-
-      alert(message);
-
-    } finally {
-      setLoading(false);
-    }
+    onLogin({
+      id: res.data.user._id,
+      name: res.data.user.name,
+      telephone: res.data.user.telephone,
+      token: res.data.token,
+    });
   };
-
+const validatePhone = (phone) => {
+  const phoneRegex = /^[0-9]{8,15}$/;
+  return phoneRegex.test(phone);
+};
   return (
-    <div className="login-page">
+  <div className="auth-container">
+    <div className="auth-card">
 
-      <form className="login-card" onSubmit={handleSubmit}>
 
-        {/* LOGO */}
-        <img src="/logo.png" alt="CampChat" className="login-logo" />
+      <h2 className="auth-title">
+      
+        {isLogin ? "Login" : "Register"}
+      </h2>
+  <p className="auth-description"> Communicate anytime, anywhere with ease</p>
+      <form onSubmit={handleSubmit} className="auth-form">
 
-        <h1>CampChat</h1>
-        <p className="login-subtitle">
-          Communicate with ease, anytime, anywhere.
-        </p>
-
-        {/* NAME (REGISTER ONLY) */}
         {!isLogin && (
           <input
-            type="text"
-            placeholder="Full Name"
+            className="auth-input"
+            placeholder="Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            required
           />
         )}
 
-        {/* TELEPHONE */}
-        <input
-          type="text"
-          placeholder="Telephone Number"
-          value={telephone}
-          onChange={(e) => setTelephone(e.target.value)}
-          required
-        />
+     <input
+  className="login-input"
+  placeholder="Mobile Number (e.g. 076123456)"
+  value={telephone}
+  onChange={(e) => setTelephone(e.target.value)}
+/>
 
-        {/* PASSWORD */}
         <input
+          className="auth-input"
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          required
         />
 
-        {/* BUTTON */}
-        <button type="submit" disabled={loading}>
-          {loading
-            ? "Please wait..."
-            : isLogin
-              ? "Login"
-              : "Create Account"}
+        <button type="submit" className="auth-button">
+          {isLogin ? "Login" : "Register"}
         </button>
-
-        {/* SWITCH */}
-        <p className="switch-auth">
-          {isLogin ? "Don't have an account?" : "Already have an account?"}
-
-          <span onClick={() => setIsLogin(!isLogin)}>
-            {isLogin ? " Register" : " Login"}
-          </span>
-        </p>
-
       </form>
+
+      <p className="auth-switch" onClick={() => setIsLogin(!isLogin)}>
+        {isLogin ? "Create new account" : "Already have an account?"}
+      </p>
+
     </div>
-  );
-}
+  </div>
+);}
 
 export default Login;

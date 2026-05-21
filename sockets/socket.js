@@ -1,115 +1,137 @@
-const Message = require("../models/Message");
+import Message from "../models/Message.js";
 
-const onlineUsers = {}; // userId -> socketId
+// Store online users
+const onlineUsers = {};
 
-module.exports = (io) => {
+// Normalize IDs to string to avoid type mismatch
+const normalizeId = (id) => String(id);
+
+export default (io) => {
+
   io.on("connection", (socket) => {
-    console.log("Socket connected:", socket.id);
 
-    // Register user and broadcast online list
+    console.log(`✅ Socket connected: ${socket.id}`);
+
+    // REGISTER USER
     socket.on("register_user", (userId) => {
-      socket.userId = userId;
-      onlineUsers[userId] = socket.id;
+      const normalized = normalizeId(userId);
+      if (!normalized) return;
+      socket.userId = normalized;
+      onlineUsers[normalized] = socket.id;
       io.emit("online_users", Object.keys(onlineUsers));
-      console.log(`User ${userId} is online`);
+      console.log(`📱 User ${normalized} is online`);
+      console.log("Online users:", Object.keys(onlineUsers));
     });
 
-    // Join a group room
+    // JOIN GROUP
     socket.on("join_group", (groupId) => {
+      if (!groupId) return;
       socket.join(`group_${groupId}`);
+      console.log(`User ${socket.userId} joined group ${groupId}`);
     });
 
-    // ── DIRECT MESSAGE ──
+    // DIRECT MESSAGE
     socket.on("send_message", async (data) => {
-      const { senderId, senderName, senderAvatar, receiverId, message } = data;
+      console.log("📨 Received message:", data);
+      
       try {
+        let { senderId, receiverId, message, senderName, senderAvatar } = data;
+        
+        // Normalize IDs
+        senderId = normalizeId(senderId);
+        receiverId = normalizeId(receiverId);
+        
+        if (!senderId || !receiverId || !message) {
+          console.log("Missing required fields");
+          return;
+        }
+        
+        // Save to database
         const newMessage = new Message({
-          senderId, receiverId, senderName,
+          senderId,
+          receiverId,
+          senderName,
           senderAvatar: senderAvatar || "",
           message,
-          timestamp: data.timestamp || new Date()
+          timestamp: new Date(),
         });
-        const saved = await newMessage.save();
-        data._id = saved._id;
-
+        
+        const savedMessage = await newMessage.save();
+        console.log("✅ Message saved:", savedMessage._id);
+        
+        const messageData = {
+          ...data,
+          _id: savedMessage._id,
+          timestamp: savedMessage.timestamp,
+        };
+        
+        // Send to receiver if online (using normalized receiverId)
         const receiverSocket = onlineUsers[receiverId];
         if (receiverSocket) {
-          io.to(receiverSocket).emit("receive_message", data);
+          io.to(receiverSocket).emit("receive_message", messageData);
+          console.log("✅ Message sent to receiver");
+        } else {
+          console.log(`❌ Receiver ${receiverId} not online`);
         }
-      } catch (err) {
-        console.error("send_message error:", err);
+        
+      } catch (error) {
+        console.error("Error:", error.message);
       }
     });
 
-    // ── DELETE MESSAGE ──
-    socket.on("delete_message", async ({ messageId, requesterId }) => {
-      try {
-        const msg = await Message.findById(messageId);
-        if (!msg) return;
-
-        await Message.findByIdAndDelete(messageId);
-
-        const payload = {
-          messageId,
-          senderId: msg.senderId,
-          receiverId: msg.receiverId,
-          groupId: msg.groupId || null
-        };
-
-        const recipientSocket = onlineUsers[msg.receiverId];
-        const senderSocket = onlineUsers[msg.senderId];
-
-        if (recipientSocket) {
-          io.to(recipientSocket).emit("message_deleted", payload);
-        }
-        if (senderSocket && senderSocket !== socket.id) {
-          io.to(senderSocket).emit("message_deleted", payload);
-        }
-      } catch (err) {
-        console.error("delete_message error:", err);
-      }
-    });
-
-    // ── GROUP MESSAGE ──
+    // GROUP MESSAGE
     socket.on("send_group_message", async (data) => {
-      const { senderId, senderName, senderAvatar, groupId, message } = data;
       try {
+        let { groupId, message, senderName, senderId, senderAvatar } = data;
+        senderId = normalizeId(senderId);
+        
+        if (!groupId || !message) return;
+        
         const newMessage = new Message({
-          senderId, senderName,
+          senderId,
+          senderName,
           senderAvatar: senderAvatar || "",
-          groupId, message,
-          timestamp: data.timestamp || new Date()
+          groupId,
+          message,
+          timestamp: new Date(),
         });
-        const saved = await newMessage.save();
-        data._id = saved._id;
-
-        // Broadcast to everyone in the group room except sender
-        socket.to(`group_${groupId}`).emit("receive_group_message", data);
-      } catch (err) {
-        console.error("send_group_message error:", err);
+        
+        const savedMessage = await newMessage.save();
+        
+        const messageData = {
+          ...data,
+          _id: savedMessage._id,
+          timestamp: savedMessage.timestamp,
+        };
+        
+        socket.to(`group_${groupId}`).emit("receive_group_message", messageData);
+        console.log("✅ Group message sent");
+        
+      } catch (error) {
+        console.error("Group message error:", error.message);
       }
     });
 
-    // ── TYPING (DM) ──
+    // TYPING INDICATOR
     socket.on("typing", ({ senderId, senderName, receiverId }) => {
-      const receiverSocket = onlineUsers[receiverId];
+      const receiverSocket = onlineUsers[normalizeId(receiverId)];
       if (receiverSocket) {
-        io.to(receiverSocket).emit("typing", { senderId, senderName });
+        io.to(receiverSocket).emit("typing", { 
+          senderId: normalizeId(senderId), 
+          senderName 
+        });
       }
     });
 
-    // ── TYPING (GROUP) ──
-    socket.on("group_typing", ({ senderId, senderName, groupId }) => {
-      socket.to(`group_${groupId}`).emit("typing", { senderId, senderName, groupId });
-    });
-
-    // ── DISCONNECT ──
+    // DISCONNECT
     socket.on("disconnect", () => {
       if (socket.userId && onlineUsers[socket.userId] === socket.id) {
         delete onlineUsers[socket.userId];
         io.emit("online_users", Object.keys(onlineUsers));
-        console.log(`User ${socket.userId} went offline`);
+        console.log(`📱 User ${socket.userId} went offline`);
       }
+      console.log(`❌ Socket disconnected: ${socket.id}`);
     });
+    
   });
 };

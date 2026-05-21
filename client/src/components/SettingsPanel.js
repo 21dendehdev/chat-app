@@ -41,17 +41,28 @@ function SettingsPanel({
 
       {/* ACCOUNT INFO */}
 
-      <div className="settings-section">
+   <div className="settings-section">
 
-        <h4>Account Information</h4>
+  <h3>Account Information</h3>
 
-        <div className="setting-item">
+  <div className="setting-item">
+    <span>Name</span>
+    <p>{user?.name || "Not set"}</p>
+  </div>
 
-          <span>User ID</span>
+  <div className="setting-item">
+    <span>Phone Number</span>
+    <p>{user?.telephone || "Not set"}</p>
+  </div>
 
-          <p>{user?.id}</p>
+  {/* <div className="setting-item">
+    <span>User ID</span>
+    <p className="user-id-text">{user?._id || user?.id || "Not available"}</p>
+  </div> */}
 
-        </div>
+
+
+
 
         <div className="setting-item">
 

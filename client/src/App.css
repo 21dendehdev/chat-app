@@ -17,7 +17,7 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-background: black ;
+background: blue;
 }
 
 
@@ -26,6 +26,7 @@ background: black ;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  
 }
 
 .bottom-nav {
@@ -60,7 +61,7 @@ background: black ;
 
 .chat-header {
   padding: 12px;
-  background: #111827;
+  background: white;
   border-bottom: 1px solid #1f2937;
 }
 
@@ -355,7 +356,7 @@ background: black ;
   bottom: 2px;
   right: 2px;
 
-  border: 2px solid #0b1220;
+  border: blue;
 }
 
 .contact-info {
@@ -502,114 +503,96 @@ background: black ;
    LOGIN PAGE
 ========================= */
 
-.login-page {
+/* LOGIN PAGE */
+.auth-container {
   height: 100vh;
-
   display: flex;
-  align-items: center;
   justify-content: center;
-
-  background: #0f172a;
-
-  padding: 20px;
+  align-items: center;
+  background: white; /* dark clean background */
+  font-family: Arial, sans-serif;
 }
 
-/* LOGIN CARD */
-
-.login-card {
-  width: 100%;
-  max-width: 400px;
-
-  background:black;
-
-  border-radius: 20px;
-
-  padding: 30px;
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 15px;
-
-  box-shadow: 0 0 30px rgba(0,0,0,0.3);
+.auth-card {
+  width: 300px;
+  padding: 25px;
+  height: 300px;
+  
+  margin-bottom: 100px;
+  align-items: center;
+  background: orange;
+  border-radius: 15px;
+  box-shadow: white;
 }
 
-/* LOGO */
-
-.login-logo {
-  width: 80px;
-  height: 80px;
-
-  margin: 0 auto;
-
-  border-radius: 50%;
-}
-
-/* TITLE */
-
-.login-card h1 {
-  text-align: center;
-  color:orange
-}
-
-/* SUBTITLE */
-
-.login-subtitle {
-  text-align: center;
-
+.auth-title {
   color: white;
-
-  margin-bottom: 10px;
-}
-
-/* INPUT */
-
-.login-card input {
-  padding: 14px;
-
-  border: none;
-
-  outline: none;
-
-  border-radius: 10px;
-
-  background: white;
-
-  color: orange;
-}
-
-/* BUTTON */
-
-.login-card button {
-  padding: 12px;
-
-  border: none;
-
-  border-radius: 10px;
-
-  background:orange;
-
-  color: white;
-
-  font-size: 15px;
-
-  cursor: pointer;
-}
-
-/* SWITCH */
-
-.switch-auth {
   text-align: center;
-
-  color:orange;
-
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+.auth-description{
+  color:black;
+  text-align: center;
+  margin-bottom: 20px;
   font-size: 14px;
 }
 
-.switch-auth span {
+.login-input {
+  width: 100%;
+  padding: 14px;
+
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+
+  background: #111827;
   color: white;
 
-  cursor: pointer;
+  outline: none;
 
-  font-weight: bold;
+  margin-bottom: 10px;
+
+  transition: 0.2s;
 }
+
+.login-input:focus {
+  border: 1px solid orange;
+  box-shadow: 0 0 8px rgba(255,165,0,0.4);
+}
+
+.auth-input {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background:black;
+  color: white;
+}
+
+.auth-input::placeholder {
+  color: white;
+}
+
+.auth-button {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: white;
+  color:orange;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.auth-button:hover {
+  background: white;
+}
+
+.auth-switch {
+  margin-top: 15px;
+  text-align: center;
+  color: black;
+  cursor: pointer;
+  font-size: 14px;
+}
+
