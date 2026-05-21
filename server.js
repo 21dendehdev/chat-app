@@ -24,7 +24,7 @@ const io = new Server(httpServer, {
 });
 
 app.use(cors({
-  origin: "http://localhost:3000",
+   origin: "https://campchat-1.vercel.app", 
   credentials: true,
 }));
 app.use(express.json());
