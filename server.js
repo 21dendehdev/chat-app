@@ -17,16 +17,15 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:3000",
+    origin:[ "http://localhost:3000",  "https://campchat-1.vercel.app"],
     credentials: true,
     methods: ["GET", "POST"],
   },
 });
 
 app.use(cors({
-   origin: "https://campchat-1.vercel.app", 
-  credentials: true,
-}));
+   origin:[ "http://localhost:3000","https://campchat-1.vercel.app" ],  credentials: true,
+})); 
 app.use(express.json());
 
 // Routes
